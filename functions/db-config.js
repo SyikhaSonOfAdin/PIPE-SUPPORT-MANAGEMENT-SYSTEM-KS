@@ -10,10 +10,10 @@ class Access {
             const connection = await mysql.createConnection({
                 connectionLimit : 10,
                 host: 'localhost',
-                user: 'root',
-                // user: 'syih2943_admin',
-                password: '',
-                // password: 'syikhaakmal19',
+                // user: 'root',
+                user: 'syih2943_admin',
+                // password: '',
+                password: 'syikhaakmal19',
                 database: this.#database,
             });
             console.log('Connected to the database');
