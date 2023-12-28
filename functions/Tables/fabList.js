@@ -1,10 +1,9 @@
-const { Database } = require("../db-connect");
+const { PSMS } = require("../db-config")
 
 class FabList {
-    #database = new Database();
 
     async sendFabFile(drawing_id, fabList_name) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
         const prevent = await this.processData(drawing_id);
 
         if (prevent) {
@@ -12,11 +11,11 @@ class FabList {
         }
 
         try {
-            return (await this.#database.PSMS()).query('INSERT INTO fabricationlist (drawing_id, user_id, uploadDate, fabList_name) VALUES (?, (SELECT user_id FROM drawinglist WHERE drawing_id = ?), NOW(), ?)', [drawing_id, drawing_id, fabList_name])
+            return await connection.query('INSERT INTO fabricationlist (drawing_id, user_id, uploadDate, fabList_name) VALUES (?, (SELECT user_id FROM drawinglist WHERE drawing_id = ?), NOW(), ?)', [drawing_id, drawing_id, fabList_name])
         } catch (error) {
             console.error('Error send file  :', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
@@ -60,7 +59,7 @@ class FabList {
 
 
     async detailProcess(drawing_id, arrayOfDetail) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
         const prevent = await this.processData(drawing_id);
 
         if (prevent) {
@@ -137,81 +136,81 @@ class FabList {
         } catch (error) {
             console.log('Error sending detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
 
 
     }
 
     async statusUpdate(drawing_id, status) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
             return await connection.query('UPDATE fabricationlist SET status = ? WHERE drawing_id = ?', [status, drawing_id]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
     // GET FAB
     async getFabByDrawingId(drawingId) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
-            return (await this.#database.PSMS()).query('SELECT * FROM fabricationlist WHERE drawing_id = ?', [drawingId]);
+            return await connection.query('SELECT * FROM fabricationlist WHERE drawing_id = ?', [drawingId]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
 
     // GET DETAIL OF FABLIST
     async getDetailbyDetailId(fabDetail_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
-            return (await this.#database.PSMS()).query('SELECT * FROM fabricationdetails WHERE fabDetail_id = ?', [fabDetail_id]);
+            return await connection.query('SELECT * FROM fabricationdetails WHERE fabDetail_id = ?', [fabDetail_id]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
 
     async getDetailbyDrawingNo(drawingNo) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
-            return (await this.#database.PSMS()).query('SELECT * FROM fabricationdetail WHERE NO_DRAWING = ?', [drawingNo]);
+            return await connection.query('SELECT * FROM fabricationdetail WHERE NO_DRAWING = ?', [drawingNo]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
 
     async getDetailbyDrawingId(drawing_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
-            return (await this.#database.PSMS()).query('SELECT * FROM fabricationdetail WHERE drawing_id = ?', [drawing_id]);
+            return await connection.query('SELECT * FROM fabricationdetail WHERE drawing_id = ?', [drawing_id]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
 
     // PROCESS DATA DETAIL FOR MTO SUMMARY
     async processData(drawing_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
         const query = `SELECT * FROM fabricationdetail WHERE drawing_id = ?`;
 
 
@@ -230,7 +229,7 @@ class FabList {
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 }

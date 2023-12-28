@@ -1,30 +1,29 @@
 const mysql = require('mysql2/promise');
 
 class Access {
-    #database;
+    #pool;
 
-    async connect(database) {
-        this.#database = database ;
+  constructor(database) {
+    this.#pool = mysql.createPool({
+      connectionLimit: 25,
+      queueLimit: 50,
+      host: 'localhost',
+      user: 'root',
+      user: 'syih2943_admin',      
+      password: 'syikhaakmal19',
+      password: '',
+      database: database,
+    });
+  }
 
-        try {
-            const connection = await mysql.createConnection({
-                connectionLimit : 10,
-                host: 'localhost',
-                // user: 'root',
-                user: 'syih2943_admin',
-                // password: '',
-                password: 'syikhaakmal19',
-                database: this.#database,
-            });
-            console.log('Connected to the database');
-            return connection;
-        } catch (error) {
-            console.error('Error connecting to the database:', error);
-            throw error;
-        }
-    }
+  async getConnection() {
+    return await this.#pool.getConnection();
+  }
 }
 
+const PSMS = new Access('syih2943_pipesupportmanagementsystem')
+
 module.exports = {
-    Access
+    Access,
+    PSMS
 }

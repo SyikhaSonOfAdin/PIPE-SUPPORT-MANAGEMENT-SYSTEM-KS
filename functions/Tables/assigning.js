@@ -1,10 +1,10 @@
-const { Database } = require("../db-connect");
+const { PSMS } = require("../db-config") ;
 
 class Assignment {
-    #database = new Database();
+
 
     async assigning(assignedBy, worker, typePs, dueDate) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
       
         return new Promise(async (resolve, reject) => {
           try {
@@ -16,26 +16,26 @@ class Assignment {
           } catch (error) {
             reject("Assigning Error: " + error.message); 
           } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
           }
         });
       }
       
 
     async getAssignment(worker) {
-        const connection = await this.#database.PSMS() ;
+        const connection = await PSMS.getConnection() ;
 
         try {
             return await connection.query('SELECT ass.id AS assignment_id, jd.id AS sum_joint_data, jd.TYPE_PS FROM assignment AS ass JOIN sum_jointdata AS jd ON ass.TYPE_PS = jd.id WHERE ENGINEER = ? AND STATUS = "Assigned"', [worker]);
         } catch (error) {
             return error
         } finally {
-            await this.#database.closeConnection(connection) ;
+            connection.release() ;
         }
     }
 
     async updateAssignment(assignment_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
             await connection.query(
@@ -45,12 +45,12 @@ class Assignment {
         } catch (error) {
             console.error('Error sending drawing:', error.message);
         } finally {            
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
     async updateInspected(drawing_id, user_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
             await connection.query(
@@ -60,7 +60,7 @@ class Assignment {
         } catch (error) {
             console.error('Error sending drawing:', error.message);
         } finally {            
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 }

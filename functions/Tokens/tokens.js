@@ -1,8 +1,7 @@
-const { Database } = require("../db-connect");
+const { PSMS } = require("../db-config")
 
 
-class Tokens {
-    #database = new Database();
+class Tokens {    
 
     #generateToken = (length) => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,7 +16,7 @@ class Tokens {
     }
 
     async userToken(user_id) {
-        const connect = await this.#database.PSMS() ;
+        const connect = await PSMS.getConnection() ;
         const query = "INSERT INTO authentication (user_id, token) VALUES (?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token)"; 
         const token = this.#generateToken(64) ;
 
@@ -27,6 +26,8 @@ class Tokens {
                 resolve(token) ;
             } catch (error) {
                 reject(error) ;
+            } finally {
+                connect.release() ;
             }
         })
     }

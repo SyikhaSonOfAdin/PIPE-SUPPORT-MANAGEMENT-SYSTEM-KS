@@ -1,12 +1,11 @@
-const { Database } = require("../db-connect");
 const { Assignment } = require("./assigning");
+const { PSMS } = require("../db-config")
 
 class DrawingList {
-    #database = new Database();
     #assignment = new Assignment() ;
 
     async sendDrawing(user_id, assignment_id, sum_jointdata_id, file_name) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
             await connection.query(
@@ -17,24 +16,24 @@ class DrawingList {
         } catch (error) {
             console.error('Error sending drawing:', error.message);
         } finally {            
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }    
 
     async statusUpdate(drawing_id, status) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
-            return (await this.#database.PSMS()).query('UPDATE drawinglist SET status = ? WHERE drawing_id = ?', [status, drawing_id]);
+            return connection.query('UPDATE drawinglist SET status = ? WHERE drawing_id = ?', [status, drawing_id]);
         } catch (error) {
             console.error('Error getting detail:', error.message);
         } finally {
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
     async getDrawing(drawing_id) {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
 
         try {
             return await connection.query('SELECT * FROM drawinglist JOIN sum_jointdata AS jd ON drawinglist.sum_jointdata_id = jd.id WHERE drawing_id = ?', [drawing_id]);
@@ -42,12 +41,12 @@ class DrawingList {
             console.error('Error getting drawing:', error.message);
         } finally {
             // Tutup koneksi setelah penggunaan.
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 
     async getDrawingAllAndFab() {
-        const connection = await this.#database.PSMS();
+        const connection = await PSMS.getConnection();
         const query = `
         SELECT
         jd.id,
@@ -80,7 +79,7 @@ class DrawingList {
             console.error('Error getting all drawings:', error.message);
         } finally {
             // Tutup koneksi setelah penggunaan.
-            await this.#database.closeConnection(connection);
+            connection.release();
         }
     }
 }

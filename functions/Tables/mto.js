@@ -1,12 +1,10 @@
-const { Database } = require("../db-connect");
+const { PSMS } = require("../db-config")
 
 
 class Mto {
-  #database = new Database();
-
 
   async getSumOfMto() {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
     // const query = `
     // SELECT fd.FABRICATION_ITEM, fd.ITEM_CODE, fd.MATERIAL, fd.PAINT_CODE, fd.DIM1, fd.DIM2, fd.DIM3, fd.DIM4, fd.DIM5, fd.DIM6, fd.DIM7, fd.DIM8, fd.DIM9, fd.DIM10, fd.QTY, fd.QTY_UNIT, fd.NETTO_WEIGHT,
     //  fd.PAINTING_AREA, ROUND(SUM(fd.QTY * jd.SUM_QTY_OF_ISO_NO), 2) AS TOTAL_QTY, SUM(prio.QTY) AS NESTING, ROUND(SUM(fd.QTY_UNIT * jd.SUM_QTY_OF_ISO_NO), 2) AS TOTAL_QTY_UNIT, 
@@ -22,13 +20,14 @@ class Mto {
     } catch (error) {
       return error
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 
 
   async getType_psBySumm_id(summary_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
     const query = [`SELECT DISTINCT prio.id, prio.TYPE_PS FROM priority AS prio WHERE prio.TYPE_PS IN (SELECT sjd.TYPE_PS FROM sum_jointdata AS sjd WHERE sjd.id IN (SELECT dwg.sum_jointdata_id FROM drawinglist AS dwg WHERE dwg.drawing_id IN 
       (SELECT fd.drawing_id AS drawing FROM fabricationdetail AS fd JOIN summary AS summ ON summ.id = ? WHERE fd.ITEM_CODE = summ.ITEM_CODE AND fd.MATERIAL = summ.MATERIAL
       AND fd.PAINT_CODE = summ.SHAPE_CODE AND fd.DIM1 = summ.DIM1 AND fd.DIM2 = summ.DIM2 AND fd.DIM3 = summ.DIM3 AND fd.DIM4 = summ.DIM4 AND fd.DIM5 = summ.DIM5
@@ -41,13 +40,34 @@ class Mto {
       console.error(error);
       throw error;
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
+    }
+  }
+
+
+  async getType_psBySearch(summary_id, search) {
+    const connection = await PSMS.getConnection()
+    const query = [`SELECT DISTINCT prio.id, prio.TYPE_PS FROM priority AS prio WHERE prio.TYPE_PS IN (SELECT sjd.TYPE_PS FROM sum_jointdata AS sjd WHERE sjd.id IN (SELECT dwg.sum_jointdata_id FROM drawinglist AS dwg WHERE dwg.drawing_id IN 
+      (SELECT fd.drawing_id AS drawing FROM fabricationdetail AS fd JOIN summary AS summ ON summ.id = ? WHERE fd.ITEM_CODE = summ.ITEM_CODE AND fd.MATERIAL = summ.MATERIAL
+      AND fd.PAINT_CODE = summ.SHAPE_CODE AND fd.DIM1 = summ.DIM1 AND fd.DIM2 = summ.DIM2 AND fd.DIM3 = summ.DIM3 AND fd.DIM4 = summ.DIM4 AND fd.DIM5 = summ.DIM5
+      AND fd.DIM6 = summ.DIM6 AND fd.DIM7 = summ.DIM7 AND fd.DIM8 = summ.DIM8 AND fd.DIM9 = summ.DIM9 AND fd.DIM10 = summ.DIM10 AND prio.TYPE_PS LIKE CONCAT('%', ?, '%')))) GROUP BY prio.TYPE_PS ;`]
+    const values = [[summary_id, search]];
+
+    try {
+      return await connection.query(query[0], values[0]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      connection.release();
+
     }
   }
 
 
   async getIso_noByPrio_id(prio_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
     const query = [`SELECT * FROM priority AS prio WHERE prio.TYPE_PS = (SELECT TYPE_PS FROM priority WHERE id = ? );`]
     const values = [[prio_id]];
 
@@ -57,13 +77,47 @@ class Mto {
       console.error(error);
       throw error;
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
+    }
+  }
+
+
+  async getIso_noByBySearch(prio_id, search) {
+    const connection = await PSMS.getConnection()
+    const query = [`SELECT * FROM priority AS prio WHERE prio.TYPE_PS = (SELECT TYPE_PS FROM priority WHERE id = ? ) AND ISO_NO LIKE CONCAT('%', ?, '%');`]
+    const values = [[prio_id, search]];
+
+    try {
+      return await connection.query(query[0], values[0]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      connection.release();
+
+    }
+  }
+
+
+  async getPriority(type_ps, iso_no) {
+    const connection = await PSMS.getConnection()
+    const query = [`SELECT * FROM priority AS prio WHERE prio.TYPE_PS = (SELECT TYPE_PS FROM priority WHERE id = ? ) AND ISO_NO = (SELECT ISO_NO FROM priority WHERE id = ? );`]
+    const values = [[type_ps, iso_no]];
+
+    try {
+      return await connection.query(query[0], values[0]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      connection.release();
     }
   }
 
 
   async getNestingDetail(sum_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
     const query = [`SELECT prio.*
     FROM priority AS prio
     JOIN sum_jointdata AS jd ON prio.TYPE_PS = jd.TYPE_PS
@@ -91,13 +145,15 @@ class Mto {
       console.error(error);
       throw error;
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 
 
   async getJointDataBySummId(sum_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
+
     const query = [`SELECT joint.*
     FROM jointdata AS joint
     JOIN sum_jointdata AS jd ON joint.TYPE_PS = jd.TYPE_PS
@@ -125,13 +181,15 @@ class Mto {
       console.error(error);
       throw error;
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 
 
   async insertSumOfMto() {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
+
 
     const query = `
     INSERT INTO summary (
@@ -195,13 +253,15 @@ class Mto {
       console.error(error);
       throw error;
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 
 
   async insertCutting(summary_id, pic, qty, input_date, input_by_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
+
     const query = ['INSERT INTO cutting (summary_id, PIC, QTY, INPUT_DATE, INPUT_BY) VALUES (?, ?, ?, ?, ?)',
       'UPDATE summary AS sum SET CUTTING = sum.CUTTING + ?, BALANCE = sum.BALANCE - ?, STOCK = sum.STOCK + ? WHERE sum.id = ?'];
     const values = [[summary_id, pic, qty, input_date, input_by_id], [qty, qty, qty, summary_id]]
@@ -214,13 +274,15 @@ class Mto {
       console.error(error);
       throw error; // Lempar kembali kesalahan untuk ditangani di lapisan yang lebih tinggi
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 
 
   async insertIssued(summary_id, type_ps, iso_no, qty, fitter, input_date, input_by_id) {
-    const connection = await this.#database.PSMS();
+    const connection = await PSMS.getConnection()
+
     const query = ['INSERT INTO issued (summary_id, TYPE_PS, ISO_NO, QTY, FITTER, INPUT_DATE, INPUT_BY) VALUES (?, (SELECT TYPE_PS FROM priority WHERE id = ?), ?, ?, ?, ?, ?)',
       'UPDATE summary AS sum SET ISSUED = sum.ISSUED + ?, STOCK = sum.STOCK - ? WHERE sum.id = ?'];
     const values = [[summary_id, type_ps, iso_no, qty, fitter, input_date, input_by_id], [qty, qty, summary_id]]
@@ -233,7 +295,8 @@ class Mto {
       console.error(error);
       throw error; // Lempar kembali kesalahan untuk ditangani di lapisan yang lebih tinggi
     } finally {
-      await this.#database.closeConnection(connection);
+      connection.release();
+
     }
   }
 

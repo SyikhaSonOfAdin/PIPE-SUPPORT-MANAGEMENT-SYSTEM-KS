@@ -14,7 +14,7 @@ const router = express.Router();
 const middleware = new Middleware()
 
 router.get('/drawingfiles', async (req, res) => {
-    
+
     try {
 
         const drawingTable = new DrawingList();
@@ -46,7 +46,7 @@ router.get('/fabdetails/:drawing_id', async (req, res) => {
 
     try {
 
-        const fabDetails = new FabList() ;
+        const fabDetails = new FabList();
         const result = await fabDetails.getDetailbyDrawingId(drawing_id)
         res.status(200).json(result);
 
@@ -64,8 +64,8 @@ router.get('/fab/:drawing_id', async (req, res) => {
 
     try {
 
-        const fabDetails = new FabList() ;
-        const result = await fabDetails.getFabByDrawingId(drawing_id) ;
+        const fabDetails = new FabList();
+        const result = await fabDetails.getFabByDrawingId(drawing_id);
         res.status(200).json(result);
 
     } catch (error) {
@@ -82,8 +82,8 @@ router.get('/fab_status/:drawing_id/:status', async (req, res) => {
 
     try {
 
-        const fabDetails = new FabList() ;
-        const result = await fabDetails.statusUpdate(drawing_id, status) ;
+        const fabDetails = new FabList();
+        const result = await fabDetails.statusUpdate(drawing_id, status);
         res.status(200).json(result);
 
     } catch (error) {
@@ -97,18 +97,18 @@ router.get('/fab_status/:drawing_id/:status', async (req, res) => {
 router.get('/statusupdate/:drawing_id/:fab_status/:dwg_status', middleware.isValidated, async (req, res) => {
 
     const { drawing_id, fab_status, dwg_status } = req.params;
-    const user_id = req.query.user_id ;
+    const user_id = req.query.user_id;
 
-    const drawinglist = new DrawingList() ;
-    const assignment = new Assignment() ;
-    const fabDetailst = new FabList() ;
+    const drawinglist = new DrawingList();
+    const assignment = new Assignment();
+    const fabDetailst = new FabList();
 
     try {
 
         await assignment.updateInspected(drawing_id, user_id)
 
-        await drawinglist.statusUpdate(drawing_id, dwg_status) ;
-        const result = await fabDetailst.statusUpdate(drawing_id, fab_status) ;
+        await drawinglist.statusUpdate(drawing_id, dwg_status);
+        const result = await fabDetailst.statusUpdate(drawing_id, fab_status);
         res.status(200).json(result);
 
     } catch (error) {
@@ -127,21 +127,32 @@ router.get('/download/:filename', (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
 
     // Mengirimkan file sebagai unduhan
-    res.sendFile(filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            // Tangani kesalahan jika file tidak ditemukan
+            if (err.code === 'ENOENT') {
+                res.status(404).send('File not found.');
+            } else {
+                // Tangani kesalahan umum
+                console.error(err);
+                res.status(500).send('Internal Server Error.');
+            }
+        }
+    });
 });
 
 router.get('/assigning', middleware.isValidated, async (req, res) => {
-    const assignedBy = req.query.by ;
-    const worker = req.query.worker ;
-    const typePs = req.query.type ;
-    const dueDate = req.query.dueDate ;
+    const assignedBy = req.query.by;
+    const worker = req.query.worker;
+    const typePs = req.query.type;
+    const dueDate = req.query.dueDate;
 
-    const assignment = new Assignment() ;
+    const assignment = new Assignment();
 
     try {
-        const process = await assignment.assigning(assignedBy, worker, typePs, dueDate) ;
+        const process = await assignment.assigning(assignedBy, worker, typePs, dueDate);
     } catch (e) {
-        console.log(e)        
+        console.log(e)
     } finally {
         res.status(200).json({
             Status: 'success',
@@ -151,12 +162,12 @@ router.get('/assigning', middleware.isValidated, async (req, res) => {
 })
 
 router.get('/assignment', async (req, res) => {
-    const worker = req.query.worker ;
+    const worker = req.query.worker;
 
-    const assignment = new Assignment() ;
+    const assignment = new Assignment();
 
     try {
-        const result = await assignment.getAssignment(worker) ;
+        const result = await assignment.getAssignment(worker);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -166,10 +177,10 @@ router.get('/assignment', async (req, res) => {
 
 router.get('/jointdata', async (req, res) => {
 
-    const setup = new SetupData() ;
+    const setup = new SetupData();
 
     try {
-        const result = await setup.getDataGroup() ;
+        const result = await setup.getDataGroup();
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -179,10 +190,10 @@ router.get('/jointdata', async (req, res) => {
 
 router.get('/jointdatafiltered', async (req, res) => {
 
-    const setup = new SetupData() ;
+    const setup = new SetupData();
 
     try {
-        const result = await setup.getDataGroupFiltered() ;
+        const result = await setup.getDataGroupFiltered();
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -192,10 +203,10 @@ router.get('/jointdatafiltered', async (req, res) => {
 
 router.get('/users', async (req, res) => {
 
-    const user = new Users() ;
+    const user = new Users();
 
     try {
-        const result = await user.getUsers() ;
+        const result = await user.getUsers();
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -205,10 +216,10 @@ router.get('/users', async (req, res) => {
 
 router.get('/sum/mto', async (req, res) => {
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.getSumOfMto() ;
+        const result = await sum.getSumOfMto();
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -216,16 +227,16 @@ router.get('/sum/mto', async (req, res) => {
 })
 
 router.get('/sum/mto/cutting', async (req, res) => {
-    const summary_id = req.query.summary_id ;
-    const pic = req.query.pic ;
-    const qty = req.query.qty ;
-    const date = req.query.date ;
-    const by = req.query.user_id ;
+    const summary_id = req.query.summary_id;
+    const pic = req.query.pic;
+    const qty = req.query.qty;
+    const date = req.query.date;
+    const by = req.query.user_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.insertCutting(summary_id, pic, qty, date, by) ;
+        const result = await sum.insertCutting(summary_id, pic, qty, date, by);
         res.status(200).json(result)
     } catch (error) {
         console.log(error.message)
@@ -234,18 +245,18 @@ router.get('/sum/mto/cutting', async (req, res) => {
 
 
 router.get('/sum/mto/issued', async (req, res) => {
-    const summary_id = req.query.summary_id ;
-    const type_ps = req.query.type_ps ;
-    const iso_no = req.query.iso_no ;
-    const fitter = req.query.fitter ;
-    const qty = req.query.qty ;
-    const date = req.query.date ;
-    const by = req.query.user_id ;
+    const summary_id = req.query.summary_id;
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const fitter = req.query.fitter;
+    const qty = req.query.qty;
+    const date = req.query.date;
+    const by = req.query.user_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.insertIssued(summary_id, type_ps, iso_no, qty, fitter, date, by) ;
+        const result = await sum.insertIssued(summary_id, type_ps, iso_no, qty, fitter, date, by);
         res.status(200).json(result)
     } catch (error) {
         console.log(error.message)
@@ -253,12 +264,26 @@ router.get('/sum/mto/issued', async (req, res) => {
 })
 
 router.get('/sum/mto/getType_psBySumm_id', async (req, res) => {
-    const sum_id = req.query.sum_id ;
+    const sum_id = req.query.sum_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.getType_psBySumm_id(sum_id) ;
+        const result = await sum.getType_psBySumm_id(sum_id);
+        res.status(200).json(result[0])
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+router.get('/sum/mto/getType_psBySearch', async (req, res) => {
+    const sum_id = req.query.sum_id;
+    const search = req.query.search;
+
+    const sum = new Mto();
+
+    try {
+        const result = await sum.getType_psBySearch(sum_id, search);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -266,12 +291,40 @@ router.get('/sum/mto/getType_psBySumm_id', async (req, res) => {
 })
 
 router.get('/sum/mto/getIso_noByPrio_id', async (req, res) => {
-    const prio_id = req.query.prio_id ;
+    const prio_id = req.query.prio_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.getIso_noByPrio_id(prio_id) ;
+        const result = await sum.getIso_noByPrio_id(prio_id);
+        res.status(200).json(result[0])
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+router.get('/sum/mto/getIso_noByBySearch', async (req, res) => {
+    const sum_id = req.query.sum_id;
+    const search = req.query.search;
+
+    const sum = new Mto();
+
+    try {
+        const result = await sum.getIso_noByBySearch(sum_id, search);
+        res.status(200).json(result[0])
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+router.get('/sum/mto/get_priority', async (req, res) => {
+    const sum_id = req.query.sum_id;
+    const iso_no = req.query.iso_no;
+
+    const sum = new Mto();
+
+    try {
+        const result = await sum.getPriority(sum_id, iso_no);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -279,12 +332,12 @@ router.get('/sum/mto/getIso_noByPrio_id', async (req, res) => {
 })
 
 router.get('/sum/mto/nestingdetail', async (req, res) => {
-    const summ_id = req.query.summ_id ;
+    const summ_id = req.query.summ_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.getNestingDetail(summ_id) ;
+        const result = await sum.getNestingDetail(summ_id);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -292,12 +345,12 @@ router.get('/sum/mto/nestingdetail', async (req, res) => {
 })
 
 router.get('/sum/mto/jointdetail', async (req, res) => {
-    const summ_id = req.query.summ_id ;
+    const summ_id = req.query.summ_id;
 
-    const sum = new Mto() ;
+    const sum = new Mto();
 
     try {
-        const result = await sum.getJointDataBySummId(summ_id) ;
+        const result = await sum.getJointDataBySummId(summ_id);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -306,12 +359,12 @@ router.get('/sum/mto/jointdetail', async (req, res) => {
 
 
 router.get('/iso/:type_ps_id', async (req, res) => {
-    const { type_ps_id } = req.params ;
+    const { type_ps_id } = req.params;
 
-    const iso = new SetupData() ;
+    const iso = new SetupData();
 
     try {
-        const result = await iso.isoDetail(type_ps_id) ;
+        const result = await iso.isoDetail(type_ps_id);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -321,10 +374,10 @@ router.get('/iso/:type_ps_id', async (req, res) => {
 // ISO NO END POINT
 router.get('/priority', async (req, res) => {
 
-    const priority = new Priority() ;
+    const priority = new Priority();
 
     try {
-        const result = await priority.priorityGetData() ;
+        const result = await priority.priorityGetData();
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
@@ -333,13 +386,13 @@ router.get('/priority', async (req, res) => {
 
 
 router.get('/priority/detail', async (req, res) => {
-    const type_ps = req.query.type_ps ;
-    const prio = req.query.priority ;
+    const type_ps = req.query.type_ps;
+    const prio = req.query.priority;
 
-    const priority = new Priority() ;
+    const priority = new Priority();
 
     try {
-        const result = await priority.priorityDetail(type_ps, prio) ;
+        const result = await priority.priorityDetail(type_ps, prio);
         res.status(200).json(result[0])
     } catch (error) {
         console.log(error.message)
