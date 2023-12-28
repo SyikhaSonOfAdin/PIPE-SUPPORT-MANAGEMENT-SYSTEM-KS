@@ -8,10 +8,10 @@ class Access {
       connectionLimit: 25,
       queueLimit: 50,
       host: 'localhost',
-      user: 'root',
+      // user: 'root',
+      // password: '',
       user: 'syih2943_admin',      
       password: 'syikhaakmal19',
-      password: '',
       database: database,
     });
   }
