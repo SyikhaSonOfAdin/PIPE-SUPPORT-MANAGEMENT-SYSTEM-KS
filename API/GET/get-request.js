@@ -331,6 +331,21 @@ router.get('/sum/mto/get_priority', async (req, res) => {
     }
 })
 
+router.get('/sum/mto/get_qty', async (req, res) => {
+    const sum_id = req.query.sum_id;
+    const iso_no = req.query.iso_no;
+    const prioritas = req.query.priority;
+
+    const sum = new Mto();
+
+    try {
+        const result = await sum.getQty(sum_id, iso_no, prioritas);
+        res.status(200).json(result[0])
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
 router.get('/sum/mto/nestingdetail', async (req, res) => {
     const summ_id = req.query.summ_id;
 

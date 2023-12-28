@@ -116,6 +116,22 @@ class Mto {
   }
 
 
+  async getQty(type_ps, iso_no, priority) {
+    const connection = await PSMS.getConnection()
+    const query = [`SELECT * FROM priority AS prio WHERE prio.TYPE_PS = (SELECT TYPE_PS FROM priority WHERE id = ? ) AND ISO_NO = (SELECT ISO_NO FROM priority WHERE id = ? ) AND PRIORITY = ?;`]
+    const values = [[type_ps, iso_no, priority]];
+
+    try {
+      return await connection.query(query[0], values[0]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+
   async getNestingDetail(sum_id) {
     const connection = await PSMS.getConnection()
     const query = [`SELECT prio.*
