@@ -26,11 +26,11 @@ class FabList {
 
         try {
             const query = `
-                INSERT INTO fabricationdetail (drawing_id, LP, HEC_STD_NO, SUPPORT_NO, NO_DRAWING, FABRICATION_ITEM, ITEM_CODE, MATERIAL, PAINT_CODE, DIM1, DIM2, DIM3, DIM4, DIM5, DIM6, DIM7, DIM8, DIM9, DIM10, QTY, QTY_UNIT, NETTO_WEIGHT, PAINTING_AREA)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                INSERT INTO fabricationdetail (drawing_id, sum_jointdata_id, LP, HEC_STD_NO, SUPPORT_NO, NO_DRAWING, FABRICATION_ITEM, ITEM_CODE, MATERIAL, PAINT_CODE, DIM1, DIM2, DIM3, DIM4, DIM5, DIM6, DIM7, DIM8, DIM9, DIM10, QTY, QTY_UNIT, NETTO_WEIGHT, PAINTING_AREA)
+                VALUES (?, (SELECT jd.id FROM sum_jointdata AS jd WHERE jd.TYPE_PS = ? LIMIT 1), ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             `;
             const values = [
-                drawing_id, LP, HEC_STD_NO, SUPPORT_NO, NO_DRAWING, FABRICATION_ITEM, ITEM_CODE, MATERIAL, PAINT_CODE, DIM1, DIM2, DIM3, DIM4, DIM5, DIM6, DIM7, DIM8, DIM9, DIM10, QTY, QTY_UNIT, NETTO_WEIGHT, PAINTING_AREA
+                drawing_id, HEC_STD_NO, LP, HEC_STD_NO, SUPPORT_NO, NO_DRAWING, FABRICATION_ITEM, ITEM_CODE, MATERIAL, PAINT_CODE, DIM1, DIM2, DIM3, DIM4, DIM5, DIM6, DIM7, DIM8, DIM9, DIM10, QTY, QTY_UNIT, NETTO_WEIGHT, PAINTING_AREA
             ];
             return (await conn).query(query, values);
         } catch (error) {
@@ -81,33 +81,8 @@ class FabList {
                     }
                 }
 
-                // await this.#sendDetail({
-                //     drawing_id: drawing_id,
-                //     LP: arrayOfDetail[i].LP,
-                //     HEC_STD_NO: arrayOfDetail[i]['HEC STD NO'],
-                //     SUPPORT_NO: arrayOfDetail[i]['SUPPORT NO'],
-                //     NO_DRAWING: arrayOfDetail[i]['NO DRAWING'],
-                //     FABRICATION_ITEM: arrayOfDetail[i]['FABRICATION ITEM'],
-                //     ITEM_CODE: arrayOfDetail[i]['ITEM CODE'],
-                //     MATERIAL: arrayOfDetail[i]['MATERIAL'],
-                //     PAINT_CODE: arrayOfDetail[i]['PAINT CODE'],
-                //     DIM1: arrayOfDetail[i].DIM1,
-                //     DIM2: arrayOfDetail[i].DIM2,
-                //     DIM3: arrayOfDetail[i].DIM3,
-                //     DIM4: arrayOfDetail[i].DIM4,
-                //     DIM5: arrayOfDetail[i].DIM5,
-                //     DIM6: arrayOfDetail[i].DIM6,
-                //     DIM7: arrayOfDetail[i].DIM7,
-                //     DIM8: arrayOfDetail[i].DIM8,
-                //     DIM9: arrayOfDetail[i].DIM9,
-                //     DIM10: arrayOfDetail[i].DIM10,
-                //     QTY: arrayOfDetail[i].QTY,
-                //     QTY_UNIT: arrayOfDetail[i]['QTY UNIT'].toFixed(2),
-                //     NETTO_WEIGHT: arrayOfDetail[i]['NETTO WEIGHT'].toFixed(2),
-                //     PAINTING_AREA: arrayOfDetail[i]['PAINTING AREA']
-                // }, connection)
-
-                await this.#sendDetailTemp({
+                await this.#sendDetail({
+                    drawing_id: drawing_id,
                     LP: arrayOfDetail[i].LP,
                     HEC_STD_NO: arrayOfDetail[i]['HEC STD NO'],
                     SUPPORT_NO: arrayOfDetail[i]['SUPPORT NO'],
@@ -131,6 +106,31 @@ class FabList {
                     NETTO_WEIGHT: arrayOfDetail[i]['NETTO WEIGHT'].toFixed(2),
                     PAINTING_AREA: arrayOfDetail[i]['PAINTING AREA']
                 }, connection)
+
+                // await this.#sendDetailTemp({
+                //     LP: arrayOfDetail[i].LP,
+                //     HEC_STD_NO: arrayOfDetail[i]['HEC STD NO'],
+                //     SUPPORT_NO: arrayOfDetail[i]['SUPPORT NO'],
+                //     NO_DRAWING: arrayOfDetail[i]['NO DRAWING'],
+                //     FABRICATION_ITEM: arrayOfDetail[i]['FABRICATION ITEM'],
+                //     ITEM_CODE: arrayOfDetail[i]['ITEM CODE'],
+                //     MATERIAL: arrayOfDetail[i]['MATERIAL'],
+                //     PAINT_CODE: arrayOfDetail[i]['PAINT CODE'],
+                //     DIM1: arrayOfDetail[i].DIM1,
+                //     DIM2: arrayOfDetail[i].DIM2,
+                //     DIM3: arrayOfDetail[i].DIM3,
+                //     DIM4: arrayOfDetail[i].DIM4,
+                //     DIM5: arrayOfDetail[i].DIM5,
+                //     DIM6: arrayOfDetail[i].DIM6,
+                //     DIM7: arrayOfDetail[i].DIM7,
+                //     DIM8: arrayOfDetail[i].DIM8,
+                //     DIM9: arrayOfDetail[i].DIM9,
+                //     DIM10: arrayOfDetail[i].DIM10,
+                //     QTY: arrayOfDetail[i].QTY,
+                //     QTY_UNIT: arrayOfDetail[i]['QTY UNIT'].toFixed(2),
+                //     NETTO_WEIGHT: arrayOfDetail[i]['NETTO WEIGHT'].toFixed(2),
+                //     PAINTING_AREA: arrayOfDetail[i]['PAINTING AREA']
+                // }, connection)
             }
 
         } catch (error) {

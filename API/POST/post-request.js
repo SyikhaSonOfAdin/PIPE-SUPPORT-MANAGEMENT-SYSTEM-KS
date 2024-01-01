@@ -14,19 +14,42 @@ var nameFile;
 
 const middleware = new Middleware() ;
 const router = express.Router();
-const storage = multer.diskStorage({
+
+const storageExcel = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
+    cb(null, path.join(__dirname, '../../../uploads/excel'));
   },
   filename: (req, file, cb) => {
     nameFile = Date.now().toString() + '-' + file.originalname;
     cb(null, nameFile);
   },
 });
+const uploadExcel = multer({ storage: storageExcel });
 
-const upload = multer({ storage: storage });
+const storagePDF = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../../uploads/drawings'));
+  },
+  filename: (req, file, cb) => {
+    nameFile = Date.now().toString() + '-' + file.originalname;
+    cb(null, nameFile);
+  },
+});
+const uploadPDF = multer({ storage: storagePDF });
 
-router.post('/drawingfiles', upload.single('file'), (req, res) => {
+const storageImage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../../../uploads/images'));
+  },
+  filename: (req, file, cb) => {
+    nameFile = Date.now().toString() + '-' + file.originalname;
+    cb(null, nameFile);
+  },
+});
+const uploadImage = multer({ storage: storageImage });
+
+
+router.post('/drawingfiles', uploadPDF.single('file'), (req, res) => {
 
   const { sum_jointdata_id, assignment_id, user_id } = req.body;
   const drawingTable = new DrawingList();
@@ -49,12 +72,12 @@ router.post('/drawingfiles', upload.single('file'), (req, res) => {
 
 });
 
-router.post('/fablistfiles', upload.single('file'), async (req, res) => {
+router.post('/fablistfiles', uploadExcel.single('file'), async (req, res) => {
 
   const { drawing_id } = req.body;
 
-  const excel = new Excel();
   const fablist = new FabList();
+  const excel = new Excel();
   const mto = new Mto();
 
   try {
@@ -84,7 +107,7 @@ router.post('/fablistfiles', upload.single('file'), async (req, res) => {
   }
 })
 
-router.post('/setupfiles', upload.single('file'), async (req, res) => {
+router.post('/setupfiles', uploadExcel.single('file'), async (req, res) => {
 
   if (!req.file) {
     return res.status(400).json({
@@ -116,7 +139,7 @@ router.post('/setupfiles', upload.single('file'), async (req, res) => {
   }
 });
 
-router.post('/priorityfiles', upload.single('file'), async (req, res) => {
+router.post('/priorityfiles', uploadExcel.single('file'), async (req, res) => {
 
   if (!req.file) {
     return res.status(400).json({

@@ -5,7 +5,7 @@ const path = require('path');
 class Excel {
 
     async getData(fileName) {
-        const filePath = path.join(__dirname, '../../uploads/', fileName);
+        const filePath = path.join(__dirname, '../../../uploads/excel/', fileName);
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames;
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName[0]]);

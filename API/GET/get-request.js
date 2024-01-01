@@ -9,6 +9,11 @@ const { Mto } = require('../../functions/Tables/mto');
 
 const express = require('express');
 const path = require('path');
+const Fitup = require('../../functions/Tables/fitup');
+const Welding = require('../../functions/Tables/welding');
+const Painting = require('../../functions/Tables/painting');
+const Location = require('../../functions/Tables/location');
+const Ho = require('../../functions/Tables/Ho');
 
 const router = express.Router();
 const middleware = new Middleware()
@@ -121,7 +126,7 @@ router.get('/statusupdate/:drawing_id/:fab_status/:dwg_status', middleware.isVal
 
 router.get('/download/:filename', (req, res) => {
     const fileName = req.params.filename;
-    const filePath = path.join(__dirname, '../../uploads/', fileName);
+    const filePath = path.join(__dirname, '../../../uploads/drawings/', fileName);
 
     // Mengatur header Content-Disposition
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
@@ -401,14 +406,135 @@ router.get('/priority', async (req, res) => {
 
 
 router.get('/priority/detail', async (req, res) => {
+    const param = req.query.param;
     const type_ps = req.query.type_ps;
     const prio = req.query.priority;
 
     const priority = new Priority();
 
     try {
-        const result = await priority.priorityDetail(type_ps, prio);
+        const result = await priority.priorityDetail(param, type_ps, prio);
         res.status(200).json(result[0])
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+
+router.get('/priority/fitup', async (req, res) => {
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const priority = req.query.priority;
+    const qty = req.query.qty;
+    const fitter = req.query.fitter;
+    const date = req.query.date;
+    const rfa_no = req.query.rfa_no;
+    const by_id = req.query.by_id;
+
+
+    const FITUP = new Fitup()
+
+    try {
+        const result = await FITUP.insert(type_ps, iso_no, priority, qty, fitter, rfa_no, date, by_id)
+        res.status(200).json({
+            status: 'success',
+        })
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+
+router.get('/priority/welding', async (req, res) => {
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const priority = req.query.priority;
+    const qty = req.query.qty;
+    const welder = req.query.welder;
+    const date = req.query.date;
+    const rfa_no = req.query.rfa_no;
+    const by_id = req.query.by_id;
+
+
+    const WELDING = new Welding()
+
+    try {
+        const result = await WELDING.insert(type_ps, iso_no, priority, qty, welder, rfa_no, date, by_id)
+        res.status(200).json({
+            status: 'success',
+        })
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+
+router.get('/priority/painting', async (req, res) => {
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const priority = req.query.priority;
+    const qty = req.query.qty;
+    const painter = req.query.painter;
+    const date = req.query.date;
+    const rfa_no = req.query.rfa_no;
+    const by_id = req.query.by_id;
+
+
+    const PAINTING = new Painting()
+
+    try {
+        const result = await PAINTING.insert(type_ps, iso_no, priority, qty, painter, rfa_no, date, by_id)
+        res.status(200).json({
+            status: 'success',
+        })
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+
+router.get('/priority/location', async (req, res) => {
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const priority = req.query.priority;
+    const qty = req.query.qty;
+    const area = req.query.area;
+    const date = req.query.date;
+    const rfa_no = req.query.rfa_no;
+    const by_id = req.query.by_id;
+
+
+    const LOCATION = new Location()
+
+    try {
+        const result = await LOCATION.insert(type_ps, iso_no, priority, qty, area, rfa_no, date, by_id)
+        res.status(200).json({
+            status: 'success',
+        })
+    } catch (error) {
+        console.log(error.message)
+    }
+})
+
+
+router.get('/priority/ho', async (req, res) => {
+    const type_ps = req.query.type_ps;
+    const iso_no = req.query.iso_no;
+    const priority = req.query.priority;
+    const qty = req.query.qty;
+    const client = req.query.client;
+    const date = req.query.date;
+    const packing_list_no = req.query.packing_list_no;
+    const by_id = req.query.by_id;
+
+
+    const HO = new Ho()
+
+    try {
+        const result = await HO.insert(type_ps, iso_no, priority, qty, client, packing_list_no, date, by_id)
+        res.status(200).json({
+            status: 'success',
+        })
     } catch (error) {
         console.log(error.message)
     }

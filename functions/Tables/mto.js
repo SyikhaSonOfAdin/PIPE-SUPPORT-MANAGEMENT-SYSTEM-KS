@@ -78,7 +78,6 @@ class Mto {
       throw error;
     } finally {
       connection.release();
-
     }
   }
 
